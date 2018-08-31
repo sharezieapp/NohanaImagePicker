@@ -18,7 +18,6 @@ Pod::Spec.new do |s|
   s.name         = "NohanaImagePicker"
   s.version      = "0.9.1"
   s.summary      = "A multiple image picker for iOS app."
-  s.branch		 = "master"
 
   # This description is used to generate tags and improve search results.
   #   * Think: What does it do? Why did you write it? What is the focus?
