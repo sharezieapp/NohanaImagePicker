@@ -80,7 +80,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/sharezieapp/NohanaImagePicker.git", :branch => "#{s.branch}" }
+  s.source       = { :git => "https://github.com/sharezieapp/NohanaImagePicker.git", :branch => "master" }
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
