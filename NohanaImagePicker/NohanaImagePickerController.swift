@@ -49,6 +49,8 @@ open class NohanaImagePickerController: UIViewController {
     open var canPickAsset = { (asset: Asset) -> Bool in
         return true
     }
+    open var pressAndHoldToPreview: Bool = false
+    open var minimumPressDuration: Double = 0.3
     open var config: Config = Config()
 
     lazy var assetBundle: Bundle = {

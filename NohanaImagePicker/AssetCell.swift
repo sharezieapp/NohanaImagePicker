@@ -36,6 +36,10 @@ class AssetCell: UICollectionViewCell {
     }
 
     @IBAction func didPushPickButton(_ sender: UIButton) {
+        pickOrDropAsset()
+    }
+    
+    func pickOrDropAsset() {
         guard let asset = asset else {
             return
         }

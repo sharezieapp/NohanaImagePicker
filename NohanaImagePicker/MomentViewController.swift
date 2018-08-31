@@ -142,17 +142,23 @@ class MomentViewController: AssetListViewController, ActivityIndicatable {
             nohanaImagePickerController.delegate?.nohanaImagePicker?(nohanaImagePickerController, didSelectPhotoKitAsset: momentAlbumList[indexPath.section][indexPath.row].originalAsset)
         }
     }
-
-    // MARK: - Storyboard
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first else {
+        var selectedIndexPath: IndexPath? = nil
+        if !isGestureEnabled {
+            selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first
+        } else {
+            selectedIndexPath = selectedIndexFromLongPress
+            selectedIndexFromLongPress = nil
+        }
+        
+        guard let indexPath = selectedIndexPath else {
             return
         }
         let assetListDetailViewController = segue.destination as! AssetDetailListViewController
-        assetListDetailViewController.photoKitAssetList = momentAlbumList[selectedIndexPath.section]
+        assetListDetailViewController.photoKitAssetList = momentAlbumList[indexPath.section]
         assetListDetailViewController.nohanaImagePickerController = nohanaImagePickerController
-        assetListDetailViewController.currentIndexPath = selectedIndexPath
+        assetListDetailViewController.currentIndexPath = indexPath
     }
 
     // MARK: - IBAction

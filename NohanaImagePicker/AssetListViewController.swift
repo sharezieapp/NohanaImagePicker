@@ -22,9 +22,19 @@ class AssetListViewController: UICollectionViewController, UICollectionViewDeleg
     weak var nohanaImagePickerController: NohanaImagePickerController?
     var photoKitAssetList: PhotoKitAssetList!
 
+    let longPressGestureRecognizer: UILongPressGestureRecognizer = UILongPressGestureRecognizer()
+    let tapGestureRecognizer: UITapGestureRecognizer = UITapGestureRecognizer()
+    var isGestureEnabled: Bool = false
+    var selectedIndexFromLongPress: IndexPath? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = nohanaImagePickerController?.config.color.background ?? .white
+        if let _nohanaImagePickerController = nohanaImagePickerController {
+            if _nohanaImagePickerController.pressAndHoldToPreview {
+                enableGestureRecogniser(nohanaImagePickerController: _nohanaImagePickerController)
+            }
+        }
         updateTitle()
         setUpToolbarItems()
         addPickPhotoKitAssetNotificationObservers()
@@ -75,6 +85,21 @@ class AssetListViewController: UICollectionViewController, UICollectionViewDeleg
     func updateTitle() {
         title = photoKitAssetList.title
     }
+    
+    func enableGestureRecogniser(nohanaImagePickerController: NohanaImagePickerController) {
+        longPressGestureRecognizer.addTarget(self, action: #selector(didLongPress(_:)))
+        longPressGestureRecognizer.minimumPressDuration = nohanaImagePickerController.minimumPressDuration
+        longPressGestureRecognizer.delaysTouchesBegan = true
+        longPressGestureRecognizer.delegate = self
+        collectionView?.addGestureRecognizer(longPressGestureRecognizer)
+        
+        tapGestureRecognizer.addTarget(self, action: #selector(didTapCell(_:)))
+        tapGestureRecognizer.numberOfTapsRequired = 1
+        tapGestureRecognizer.delegate = self
+        collectionView?.addGestureRecognizer(tapGestureRecognizer)
+        
+        isGestureEnabled = true
+    }
 
     func scrollCollectionView(to indexPath: IndexPath) {
         let count: Int? = photoKitAssetList?.count
@@ -104,8 +129,10 @@ class AssetListViewController: UICollectionViewController, UICollectionViewDeleg
     // MARK: - UICollectionViewDelegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let nohanaImagePickerController = nohanaImagePickerController {
-            nohanaImagePickerController.delegate?.nohanaImagePicker?(nohanaImagePickerController, didSelectPhotoKitAsset: photoKitAssetList[indexPath.item].originalAsset)
+        if !isGestureEnabled {
+            if let nohanaImagePickerController = nohanaImagePickerController {
+                nohanaImagePickerController.delegate?.nohanaImagePicker?(nohanaImagePickerController, didSelectPhotoKitAsset: photoKitAssetList[indexPath.item].originalAsset)
+            }
         }
     }
 
@@ -143,19 +170,54 @@ class AssetListViewController: UICollectionViewController, UICollectionViewDeleg
     // MARK: - Storyboard
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        guard let selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first else {
+        var selectedIndexPath: IndexPath? = nil
+        
+        if !isGestureEnabled {
+            selectedIndexPath = collectionView?.indexPathsForSelectedItems?.first
+        } else {
+            selectedIndexPath = selectedIndexFromLongPress
+            selectedIndexFromLongPress = nil
+        }
+        
+        guard let indexPath = selectedIndexPath else {
             return
         }
-
+        
         let assetListDetailViewController = segue.destination as! AssetDetailListViewController
         assetListDetailViewController.photoKitAssetList = photoKitAssetList
         assetListDetailViewController.nohanaImagePickerController = nohanaImagePickerController
-        assetListDetailViewController.currentIndexPath = selectedIndexPath
+        assetListDetailViewController.currentIndexPath = indexPath
     }
 
     // MARK: - IBAction
     @IBAction func didPushDone(_ sender: AnyObject) {
         let pickedPhotoKitAssets = nohanaImagePickerController!.pickedAssetList.map { ($0 as! PhotoKitAsset).originalAsset }
         nohanaImagePickerController!.delegate?.nohanaImagePicker(nohanaImagePickerController!, didFinishPickingPhotoKitAssets: pickedPhotoKitAssets )
+    }
+}
+
+extension AssetListViewController: UIGestureRecognizerDelegate {
+    @objc func didTapCell(_ gesture: UIGestureRecognizer) {
+        let point = gesture.location(in: self.collectionView)
+        guard let indexPath = self.collectionView?.indexPathForItem(at: point),
+            let cell = self.collectionView?.cellForItem(at: indexPath) as? AssetCell else {
+                return
+        }
+        cell.pickOrDropAsset()
+    }
+    
+    @objc func didLongPress(_ gesture: UIGestureRecognizer) {
+        let point = gesture.location(in: self.collectionView)
+        guard let indexPath = self.collectionView?.indexPathForItem(at: point) else {
+                return
+        }
+        
+        switch gesture.state {
+        case .began:
+            selectedIndexFromLongPress = indexPath
+            performSegue(withIdentifier: "AssetDetailListViewController", sender: self)
+        default:
+            break
+        }
     }
 }

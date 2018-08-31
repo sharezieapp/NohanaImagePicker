@@ -96,6 +96,7 @@ class DemoListViewController: UITableViewController, NohanaImagePickerController
     @objc func showDefaultPicker() {
         let picker = NohanaImagePickerController()
         picker.delegate = self
+        picker.pressAndHoldToPreview = true
         present(picker, animated: true, completion: nil)
     }
 
