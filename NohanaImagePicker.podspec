@@ -53,7 +53,7 @@ Pod::Spec.new do |s|
   #  profile URL.
   #
 
-  s.author             = { "Sharezie" => "email@address.com" }
+  s.author             = { "Sharezie" => "gaurav@sharezieapp.com" }
   # Or just: s.author    = "Sharezie"
   # s.authors            = { "Sharezie" => "email@address.com" }
   # s.social_media_url   = "http://twitter.com/Sharezie"
@@ -91,7 +91,7 @@ Pod::Spec.new do |s|
   #  Not including the public_header_files will make all headers public.
   #
 
-  s.source_files  = "Classes", "Classes/**/*.{h,m}"
+  s.source_files  = "NohanaImagePicker/*.{swift}"
   s.exclude_files = "Classes/Exclude"
 
   # s.public_header_files = "Classes/**/*.h"
